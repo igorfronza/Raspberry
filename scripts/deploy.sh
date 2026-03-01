@@ -19,14 +19,6 @@ run_step() {
   bash "$script" "$BASE_DIR/.env" 2>&1 | tee "$LOG_DIR/${name}.log"
 }
 
-<<<<<<< ours
-# Etapa 1 habilitada
-run_step "$BASE_DIR/01-base.sh"
-
-cat <<'MSG'
-[OK] Etapa 1 executada.
-Próximo passo: criar/rodar 02-storage.sh.
-=======
 run_step "$BASE_DIR/01-base.sh"
 run_step "$BASE_DIR/02-storage.sh"
 run_step "$BASE_DIR/03-pihole.sh"
@@ -36,5 +28,4 @@ run_step "$BASE_DIR/05-homeassistant.sh"
 cat <<'MSG'
 [OK] Etapas 1, 2, 3, 4 e 5 executadas.
 Próximo passo: validações finais e backup da configuração.
->>>>>>> theirs
 MSG

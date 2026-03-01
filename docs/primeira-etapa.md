@@ -5,8 +5,6 @@
 - No Raspberry, a pasta de trabalho será `/opt/homelab-setup` (padrão do Linux para esse tipo de script).
 - Você pode deixar que o próprio `git clone` crie essa pasta automaticamente.
 
-<<<<<<< ours
-=======
 ## Estrutura recomendada no Windows (repo local)
 Se você também mantém uma cópia local do projeto no Windows, use a pasta raiz do repositório (a pasta que contém `.git`) para executar comandos Git.
 
@@ -58,7 +56,6 @@ git commit -m "mensagem"
 git push
 ```
 
->>>>>>> theirs
 ## 1) Primeiro boot do Raspberry (feito no Raspberry Pi Imager)
 Na gravação do SD:
 - Enable SSH
@@ -124,8 +121,6 @@ sudo bash scripts/deploy.sh
 
 ## Atenção
 Só mude `SSH_DISABLE_PASSWORD=1` depois de confirmar login por chave SSH.
-<<<<<<< ours
-=======
 
 
 ## Etapa 2 (Storage) — depois da etapa 1
@@ -264,4 +259,3 @@ Validação final no navegador:
 - Pi-hole: `http://IP_DO_RASPBERRY:8080/admin`
 - wg-easy: `http://IP_DO_RASPBERRY:51821`
 
->>>>>>> theirs
