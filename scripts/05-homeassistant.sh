@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -71,4 +70,3 @@ fi
 
 echo "[OK] Etapa 5 concluída."
 echo "[INFO] Home Assistant: http://IP_DO_RASPBERRY:${HA_HTTP_PORT}"
-

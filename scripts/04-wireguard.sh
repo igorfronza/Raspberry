@@ -25,17 +25,24 @@ WG_HOST="${WG_HOST:-}"
 WG_PORT="${WG_PORT:-51820}"
 WG_WEB_PORT="${WG_WEB_PORT:-51821}"
 WG_ADMIN_PASSWORD="${WG_ADMIN_PASSWORD:-}"
+WG_ADMIN_PASSWORD_HASH="${WG_ADMIN_PASSWORD_HASH:-}"
 WG_DEFAULT_DNS="${WG_DEFAULT_DNS:-1.1.1.1,8.8.8.8}"
 WG_DEVICE="${WG_DEVICE:-eth0}"
-WG_IMAGE="${WG_IMAGE:-ghcr.io/wg-easy/wg-easy:latest}"
+WG_IMAGE="${WG_IMAGE:-ghcr.io/wg-easy/wg-easy:14}"
 
 if [[ -z "$WG_HOST" ]]; then
   echo "[ERRO] Defina WG_HOST no scripts/.env (IP público ou DDNS)."
   exit 1
 fi
 
-if [[ -z "$WG_ADMIN_PASSWORD" ]]; then
-  echo "[ERRO] Defina WG_ADMIN_PASSWORD no scripts/.env"
+if [[ -z "$WG_ADMIN_PASSWORD_HASH" && -z "$WG_ADMIN_PASSWORD" ]]; then
+  echo "[ERRO] Defina WG_ADMIN_PASSWORD_HASH (recomendado) ou WG_ADMIN_PASSWORD no scripts/.env"
+  exit 1
+fi
+
+if [[ -z "$WG_ADMIN_PASSWORD_HASH" && ( "$WG_IMAGE" == *":14"* || "$WG_IMAGE" == *":latest"* ) ]]; then
+  echo "[ERRO] Para WG_IMAGE ${WG_IMAGE}, use WG_ADMIN_PASSWORD_HASH (bcrypt)."
+  echo "       Gere assim: sudo docker run --rm ghcr.io/wg-easy/wg-easy:14 wgpw 'SUA_SENHA'"
   exit 1
 fi
 
@@ -58,12 +65,12 @@ services:
     restart: unless-stopped
     environment:
       - WG_HOST=${WG_HOST}
-      - PASSWORD=${WG_ADMIN_PASSWORD}
       - WG_PORT=${WG_PORT}
       - WG_DEFAULT_DNS=${WG_DEFAULT_DNS}
       - WG_DEVICE=${WG_DEVICE}
       - WG_PERSISTENT_KEEPALIVE=25
       - UI_TRAFFIC_STATS=true
+      - PASSWORD_HASH=${WG_ADMIN_PASSWORD_HASH}
     volumes:
       - ${WG_BASE_DIR}/data:/etc/wireguard
     ports:
@@ -76,6 +83,12 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
       - net.ipv4.ip_forward=1
 YAML
+
+# Compatibilidade para imagens legadas (< v14)
+if [[ -z "$WG_ADMIN_PASSWORD_HASH" && -n "$WG_ADMIN_PASSWORD" ]]; then
+  sed -i "/WG_HOST=.*/a \      - PASSWORD=${WG_ADMIN_PASSWORD}" "$WG_BASE_DIR/docker-compose.yml"
+  sed -i "/PASSWORD_HASH=/d" "$WG_BASE_DIR/docker-compose.yml"
+fi
 
 if docker compose version >/dev/null 2>&1; then
   docker compose -f "$WG_BASE_DIR/docker-compose.yml" up -d

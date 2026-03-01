@@ -39,7 +39,12 @@ if [[ -z "$PIHOLE_HOST_IP" ]]; then
 fi
 
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io docker-compose-plugin
+DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io
+
+# Em algumas versões do Raspberry Pi OS, docker-compose-plugin não existe no apt.
+if ! DEBIAN_FRONTEND=noninteractive apt-get install -y docker-compose-plugin; then
+  DEBIAN_FRONTEND=noninteractive apt-get install -y docker-compose
+fi
 
 systemctl enable docker
 systemctl restart docker
@@ -69,7 +74,14 @@ services:
       - NET_ADMIN
 YAML
 
-docker compose -f "$PIHOLE_BASE_DIR/docker-compose.yml" up -d
+if docker compose version >/dev/null 2>&1; then
+  docker compose -f "$PIHOLE_BASE_DIR/docker-compose.yml" up -d
+elif command -v docker-compose >/dev/null 2>&1; then
+  docker-compose -f "$PIHOLE_BASE_DIR/docker-compose.yml" up -d
+else
+  echo "[ERRO] Nem docker compose nem docker-compose estão disponíveis."
+  exit 1
+fi
 
 if command -v ufw >/dev/null 2>&1; then
   ufw allow 53/tcp || true
